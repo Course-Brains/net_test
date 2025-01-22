@@ -27,16 +27,33 @@ async fn main() {
 async fn input(mut tcp: net::tcp::OwnedReadHalf, send: WriteChild<[u8; 30]>) {
     loop {
         let mut buf = [0; 30];
-        tcp.read(&mut buf).await.unwrap();
-        //println!("data recieved: {}", String::from_utf8(buf.to_vec()).unwrap());
-        send.send(buf).unwrap();
+        match tcp.read(&mut buf).await {
+            Ok(num) => {
+                if num == 0 {
+                    println!("Connection closed");
+                    return;
+                }
+            }
+            Err(error) => {
+                eprintln!("Failed to get input from tcp: {error}");
+                return;
+            }
+        }
+        //println!("sending data to others: {}", String::from_utf8_lossy(&buf));
+        if let Err(error) = send.send(buf) {
+            eprintln!("Failed to distribute recieved data: {error}");
+            continue;
+        }
     }
 }
 async fn output(mut tcp: net::tcp::OwnedWriteHalf, mut recv: ReadChild<[u8; 30]>) {
     loop {
         match recv.recv().await {
             Ok(data) => {
-                tcp.write_all(&data).await.unwrap()
+                if let Err(error) = tcp.write_all(&data).await {
+                    eprintln!("Failed to send data over TCP: {error}\x1b[");
+                    return;
+                }
             }
             Err(error) => {
                 match error {
@@ -44,7 +61,8 @@ async fn output(mut tcp: net::tcp::OwnedWriteHalf, mut recv: ReadChild<[u8; 30]>
                         continue;
                     }
                     RecvError::Error(error) => {
-                        panic!("{error}")
+                        eprintln!("Failed to recieve data from other threads: {error}");
+                        continue;
                     }
                 }
             }

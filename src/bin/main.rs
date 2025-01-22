@@ -23,6 +23,7 @@ fn main() {
             match stream_clone.read(&mut buf) {
                 Ok(num) => {
                     if num == 0 {
+                        println!("Connection closed");
                         break;
                     }
                 }
