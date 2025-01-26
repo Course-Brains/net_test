@@ -16,9 +16,13 @@ fn main() {
 fn recv(host: Option<u16>) {
     match host {
         Some(port) => {
+            println!("Listening...");
             for connection in make_listener(port).incoming() {
                 match connection {
-                    Ok(stream) => recv_file(stream),
+                    Ok(stream) => {
+                        println!("Incoming connection");
+                        recv_file(stream);
+                    }
                     Err(error) => eprintln!("Failed to recieve connection: {error}")
                 }
             }
@@ -73,9 +77,11 @@ fn send(host: Option<u16>) {
         .to_string();
     match host {
         Some(port) => {
+            println!("Listening");
             for connection in make_listener(port).incoming() {
                 match connection {
                     Ok(mut stream) => {
+                        println!("Incoming connection");
                         if !match stream.peer_addr() {
                             Ok(addr) => input_yn(
                                 &format!("Do you want to send {path} to {addr}? y/n")
