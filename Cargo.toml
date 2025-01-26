@@ -2,19 +2,19 @@
 name = "net_test"
 version = "0.1.0"
 edition = "2021"
-default-run = "file_comm"
+default-run = "main"
 
 [dependencies]
-# abes_nice_things = { git = "https://github.com/Course-Brains/abes_nice_things.git", rev = "8d3343b" }
-# tokio = { version = "1", features = ["rt", "macros", "net", "rt-multi-thread", "sync", "io-util" ] }
+abes_nice_things = { git = "https://github.com/Course-Brains/abes_nice_things.git", rev = "8d3343b" }
+tokio = { version = "1", features = ["rt", "macros", "net", "rt-multi-thread", "sync", "io-util" ] }
 
-# [[bins]]
-# name = "server"
-# path = "src/bin/server.rs"
+[[bins]]
+name = "server"
+path = "src/bin/server.rs"
 
-# [[bins]]
-# name = "main"
-# path = "src/bin/main.rs"
+[[bins]]
+name = "main"
+path = "src/bin/main.rs"
 
 [[bins]]
 name = "file_comm"

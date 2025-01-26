@@ -4,12 +4,7 @@ use std::str::FromStr;
 fn input() -> String {
     let mut buf = String::new();
     std::io::stdin().read_line(&mut buf).unwrap();
-    match buf.chars().next_back().unwrap() {
-        '\n' => { buf.pop(); }
-        '\r' => { buf.pop(); }
-        _ => {}
-    }
-    return buf
+    buf.trim_end().to_string()
 }
 fn input_yn(msg: &str) -> bool {
     loop {
@@ -114,6 +109,7 @@ fn send(host: Option<u16>) {
                         stream.write_all(&(path.len() as u32).to_le_bytes()).unwrap();
                         stream.write_all(path.as_bytes()).unwrap();
                         stream.write_all(&data).unwrap();
+                        println!("File sent");
                     }
                     Err(error) => eprintln!("Failed to recieve connection: {error}")
                 }
@@ -136,7 +132,6 @@ fn send(host: Option<u16>) {
             stream.write_all(&data).unwrap();
         }
     }
-
 }
 fn recv_file(mut stream: TcpStream) {
     let mut buf = [0_u8; 4];
@@ -162,6 +157,7 @@ fn recv_file(mut stream: TcpStream) {
     stream.read_to_end(&mut buf).unwrap();
 
     std::fs::write(name, buf).unwrap();
+    println!("File recieved");
 }
 fn make_listener(port: u16) -> TcpListener {
     return TcpListener::bind(
