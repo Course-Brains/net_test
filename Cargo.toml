@@ -15,3 +15,7 @@ path = "src/bin/server.rs"
 [[bins]]
 name = "main"
 path = "src/bin/main.rs"
+
+[[bins]]
+name = "file_comm"
+path = "src/bin/file_comm.rs"
