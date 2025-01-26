@@ -1,7 +1,26 @@
 use std::net::*;
 use std::io::{Read, Write};
 use std::str::FromStr;
-use abes_nice_things::{input_yn, input};
+fn input() -> String {
+    let mut buf = String::new();
+    std::io::stdin().read_line(&mut buf).unwrap();
+    match buf.chars().next_back().unwrap() {
+        '\n' => { buf.pop(); }
+        '\r' => { buf.pop(); }
+        _ => {}
+    }
+    return buf
+}
+fn input_yn(msg: &str) -> bool {
+    loop {
+        println!("{msg}");
+        match input().as_str() {
+            "y" => return true,
+            "n" => return false,
+            _ => {}
+        }
+    }
+}
 fn main() {
     let settings = Settings::new();
     if let None = settings {
