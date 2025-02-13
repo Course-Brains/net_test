@@ -5,7 +5,7 @@ edition = "2021"
 default-run = "main"
 
 [dependencies]
-abes_nice_things = { git = "https://github.com/Course-Brains/abes_nice_things.git", rev = "8d3343b" }
+abes_nice_things = { git = "https://github.com/Course-Brains/abes_nice_things.git", rev = "2e50fad" }
 tokio = { version = "1", features = ["rt", "macros", "net", "rt-multi-thread", "sync", "io-util" ] }
 
 [[bins]]
