@@ -2,8 +2,8 @@ use std::net::TcpStream;
 use abes_nice_things::{ToBinary, FromBinary};
 use crate::{Settings, Mode};
 
-type FormatID = u32;
-const HIGHEST: FormatID = 0;
+pub type FormatID = u32;
+pub const HIGHEST: FormatID = 0;
 
 pub fn hand_shake(stream: TcpStream, settings: Settings) -> Result<(), ()> {
     println!("Beginning format handshake");
@@ -12,14 +12,14 @@ pub fn hand_shake(stream: TcpStream, settings: Settings) -> Result<(), ()> {
     //////////////////////////////////////////////////////////////
     // We are assuming that backwards compatability exists      //
     //////////////////////////////////////////////////////////////
-    match settings.mode.unwrap() {
-        Mode::Recv => recv_hand_shake(stream),
+    match settings.mode {
+        Mode::Recv => recv_hand_shake(stream, settings),
         Mode::Send => send_hand_shake(stream, settings)
     }
 }
 fn send_hand_shake(mut stream: TcpStream, settings: Settings) -> Result<(), ()> {
-    println!("Sending suggested format: {HIGHEST}");
-    HIGHEST.to_binary(&mut stream);
+    println!("Sending suggested format: {}", settings.get_format());
+    settings.get_format().to_binary(&mut stream);
     // Format is decided by the reciever
     let format = FormatID::from_binary(&mut stream);
     println!("Decided to use format: {format}\nFormat handshake done");
@@ -29,20 +29,20 @@ fn send_hand_shake(mut stream: TcpStream, settings: Settings) -> Result<(), ()> 
     }
     Ok(())
 }
-fn recv_hand_shake(mut stream: TcpStream) -> Result<(), ()> {
+fn recv_hand_shake(mut stream: TcpStream, settings: Settings) -> Result<(), ()> {
     println!("Waiting for suggested format");
     let other_highest = FormatID::from_binary(&mut stream);
     println!("Suggestion: {other_highest}");
     let format = {
         // We are able to process their highest format
-        if other_highest <= HIGHEST {
+        if other_highest <= settings.get_format() {
             println!("Accepting suggestion");
             other_highest
         }
         // We cannot match them, so they have to match us
         else {
             println!("Suggestion is impossible, sending alternative");
-            HIGHEST
+            settings.get_format()
         }
     };
     format.to_binary(&mut stream);
@@ -55,8 +55,7 @@ fn recv_hand_shake(mut stream: TcpStream) -> Result<(), ()> {
 }
 mod f0 {
     // Format:
-    //
-    // Length of name
+    // Length of name(u32)
     // name
     // data
     use std::{

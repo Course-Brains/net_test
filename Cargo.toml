@@ -18,4 +18,4 @@ path = "src/bin/main.rs"
 
 [[bins]]
 name = "file_comm"
-path = "src/bin/file_comm.rs"
+path = "src/bin/file_comm/main.rs"

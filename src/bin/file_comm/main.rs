@@ -1,5 +1,5 @@
 use std::net::*;
-use abes_nice_things::input;
+use abes_nice_things::{input, input_allow_msg};
 mod formats;
 
 fn main() {
@@ -29,7 +29,7 @@ fn host(port: u16, settings: Settings) {
 }
 fn connect(settings: Settings) {
     loop {
-        match settings.mode.unwrap() {
+        match settings.mode {
             Mode::Send => println!("What port:addr do you want to send a file to?"),
             Mode::Recv => println!("What port:addr do you want to recieve a file from?")
         }
@@ -41,46 +41,15 @@ fn connect(settings: Settings) {
 }
 #[derive(Clone, Copy)]
 struct Settings {
-    mode: Option<Mode>,
-    host: Option<u16>
+    mode: Mode,
+    host: Option<u16>,
+    overide: Option<formats::FormatID>
 }
 impl Settings {
-    const HELP: &str = 
-"This is designed to send files to and from people who are able to communicate with each other over TCP.
-The person hosting the TCP listener can be decided at runtime, but only one person in the interaction can host.
-Hosting has certain advantages and disadvantages:
-
-When receiving, you can recieve from multiple people easily.
-When sending, you can send to multiple people easily.
-
-But:
-You cannot initiate the connections.
-
-While there may only be one downside, it contains certain risks.
-You must confirm that you are sending or recieving from the right person or be at rist of malware or data theft.
-Towards that end, when you are hosting, you must confirm every connection before having it go through.
-You must also do this when recieving and not hosting because I am lazy.
-
-Also, and this is important, the data is sent of TCP, not TLS.
-For those who don't recognise these, TLS is encrypted, TCP is not.
-If you are using something that encrypts your data, or you encrypt the files you are sending, then that will matter less.
-
-Here are the arguments to this binary:
-    help
-        Prints this out
-    --recv
-        Indicates that you will be recieving a file
-    --send
-        Indicates that you will be sending a file
-        (You must include either --send or --recv)
-    --host [port]
-        Indicates you will be hosting and want to use the given port
-        You must include a port because I am lazy
-        
-Using this you may notice that it closes and must be rerun after every successful exchange(unless you are hosting)
-That is because I am too lazy to properly implement this, and I don't intend to.";
+    const HELP: &str = include_str!("help.txt");
     fn new() -> Option<Settings> {
         let mut out = Settings::default();
+        let mut mode = None;
         let mut args = std::env::args();
         while let Some(arg) = args.next() {
             match arg.as_str() {
@@ -88,28 +57,59 @@ That is because I am too lazy to properly implement this, and I don't intend to.
                     println!("{}", Settings::HELP);
                     return None
                 }
-                "--recv" => out.mode = Some(Mode::Recv),
-                "--send" => out.mode = Some(Mode::Send),
+                "--recv" => mode = Some(Mode::Recv),
+                "--send" => mode = Some(Mode::Send),
                 "--host" => {
                     out.host = Some(
                         args.next().expect("Need a port after --host")
                             .parse::<u16>().expect("Need a port after --host")
                     );
+                },
+                "--override" => {
+                    out.overide = Some(
+                        args.next().expect("Need a format id after --override")
+                            .parse::<formats::FormatID>().expect("Need for a format id after --override")
+                    );
+                    assert!(
+                        out.overide.unwrap() > formats::HIGHEST,
+                        "Need a valid format id after --override"
+                    )
                 }
                 _ => {}
             }
         }
-        if let None = out.mode {
-            panic!("Need to specify if you are sending or recieving\n(--recv or --send)")
+        match mode {
+            Some(mode) => out.mode = mode,
+            None => {
+                match input_allow_msg(
+                    &["recv".to_string(),
+                        "r".to_string(),
+                        "send".to_string(),
+                        "s".to_string()
+                    ],
+                    "Specify what you will be doing(recv/send)"
+                ).as_str() {
+                    "recv"|"r" => out.mode = Mode::Recv,
+                    "send"|"s" => out.mode = Mode::Send,
+                    _ => unreachable!()
+                }
+            }
         }
         return Some(out);
+    }
+    fn get_format(&self) -> formats::FormatID {
+        match self.overide {
+            Some(format) => format,
+            None => formats::HIGHEST
+        }
     }
 }
 impl Default for Settings {
     fn default() -> Self {
         Settings {
-            mode: None,
-            host: None
+            mode: Mode::Recv,
+            host: None,
+            overide: None
         }
     }
 }
