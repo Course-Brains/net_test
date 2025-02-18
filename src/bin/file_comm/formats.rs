@@ -5,7 +5,7 @@ use crate::{Settings, Mode};
 pub type FormatID = u32;
 pub const HIGHEST: FormatID = 0;
 
-pub fn hand_shake(stream: TcpStream, settings: Settings) -> Result<(), ()> {
+pub fn hand_shake(stream: TcpStream, settings: Settings) -> Result<(), String> {
     println!("Beginning format handshake");
     //////////////////////////////////////////////////////////////
     // The person sending will be the one to suggest the format //
@@ -17,7 +17,7 @@ pub fn hand_shake(stream: TcpStream, settings: Settings) -> Result<(), ()> {
         Mode::Send => send_hand_shake(stream, settings)
     }
 }
-fn send_hand_shake(mut stream: TcpStream, settings: Settings) -> Result<(), ()> {
+fn send_hand_shake(mut stream: TcpStream, settings: Settings) -> Result<(), String> {
     println!("Sending suggested format: {}", settings.get_format());
     settings.get_format().to_binary(&mut stream);
     // Format is decided by the reciever
@@ -25,11 +25,11 @@ fn send_hand_shake(mut stream: TcpStream, settings: Settings) -> Result<(), ()> 
     println!("Decided to use format: {format}\nFormat handshake done");
     match format {
         0 => f0::send(stream, settings),
-        _ => return Err(())
+        _ => return Err("Invalid format given by other".to_string())
     }
     Ok(())
 }
-fn recv_hand_shake(mut stream: TcpStream, settings: Settings) -> Result<(), ()> {
+fn recv_hand_shake(mut stream: TcpStream, settings: Settings) -> Result<(), String> {
     println!("Waiting for suggested format");
     let other_highest = FormatID::from_binary(&mut stream);
     println!("Suggestion: {other_highest}");
@@ -45,11 +45,11 @@ fn recv_hand_shake(mut stream: TcpStream, settings: Settings) -> Result<(), ()> 
             settings.get_format()
         }
     };
-    format.to_binary(&mut stream);
+    Ok::<u32, String>(format).to_binary(&mut stream);
     println!("Format handshake done");
     match format {
         0 => f0::recv(stream),
-        _ => return Err(())
+        _ => unreachable!()
     };
     Ok(())
 }

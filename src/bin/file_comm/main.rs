@@ -21,7 +21,9 @@ fn host(port: u16, settings: Settings) {
         println!("Incoming connection");
         match connection {
             Ok(stream) => {
-                let _ = formats::hand_shake(stream, settings);
+                if let Err(error) = formats::hand_shake(stream, settings) {
+                    eprintln!("{error}")
+                }
             }
             Err(error) => eprintln!("Failed to connect: {error}")
         }
@@ -34,7 +36,11 @@ fn connect(settings: Settings) {
             Mode::Recv => println!("What port:addr do you want to recieve a file from?")
         }
         match TcpStream::connect(input()) {
-            Ok(stream) => formats::hand_shake(stream, settings).expect("INVALID FORMAT"),
+            Ok(stream) => {
+                if let Err(error) = formats::hand_shake(stream, settings) {
+                    eprintln!("{error}")
+                }
+            }
             Err(error) => eprintln!("Failed to connect: {error}")
         }
     }

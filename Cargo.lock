@@ -14,12 +14,11 @@ dependencies = [
 [[package]]
 name = "abes_nice_things"
 version = "0.1.0"
-source = "git+https://github.com/Course-Brains/abes_nice_things.git?rev=2e50fad#2e50fad4ec91919cb847c9d8110d521508476f97"
+source = "git+https://github.com/Course-Brains/abes_nice_things.git?rev=f1276a6#f1276a64dd24ec4f49d23b5686dd7ea0fd0b79ad"
 dependencies = [
  "abes_nice_procs",
  "dirs",
  "rand",
- "sequential-test",
  "serde",
  "toml 0.5.11",
 ]
@@ -275,21 +274,6 @@ name = "rustc-demangle"
 version = "0.1.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "719b953e2095829ee67db738b3bfa9fa368c94900df327b3f07fe6e794d2fe1f"
-
-[[package]]
-name = "sequential-macro"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb5facc5f409a55d25bf271c853402a00e1187097d326757043f5dd711944d07"
-
-[[package]]
-name = "sequential-test"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0d9c0d773bc7e7733264f460e5dfa00b2510421ddd6284db0749eef8dfb79e9"
-dependencies = [
- "sequential-macro",
-]
 
 [[package]]
 name = "serde"

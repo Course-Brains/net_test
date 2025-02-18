@@ -5,7 +5,7 @@ edition = "2021"
 default-run = "main"
 
 [dependencies]
-abes_nice_things = { git = "https://github.com/Course-Brains/abes_nice_things.git", rev = "2e50fad" }
+abes_nice_things = { git = "https://github.com/Course-Brains/abes_nice_things.git", rev = "f1276a6" }
 tokio = { version = "1", features = ["rt", "macros", "net", "rt-multi-thread", "sync", "io-util" ] }
 
 [[bins]]
@@ -19,3 +19,6 @@ path = "src/bin/main.rs"
 [[bins]]
 name = "file_comm"
 path = "src/bin/file_comm/main.rs"
+
+[profile.release]
+lto = true
